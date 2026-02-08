@@ -1,31 +1,71 @@
-# Dokumentasi yt-dlp Downloader dengan Integrasi Telegram
+# Beas
 
-## Pendahuluan
+Downloader sederhana berbasis `yt-dlp` dengan opsi kirim hasil ke Telegram melalui MTProto (hingga 2GB per file, tergantung batas Telegram).
 
-yt-dlp adalah fork dari youtube-dl yang menyediakan pemutaran video dari berbagai situs web. Dengan integrasi Telegram, Anda dapat mengunduh video dan mengirimnya langsung ke grup atau saluran Telegram.
+## Persiapan
 
-## Persyaratan
-
-Anda perlu menginstal beberapa paket untuk menjalankan downloader ini. Paket yang diperlukan akan diuraikan di file `requirements.txt`.
-
-## Instalasi
-
-1. Clone repositori ini.
-2. Ubah direktori ke folder repositori.
-3. Jalankan perintah berikut untuk menginstal dependensi:
-   ```bash
-   pip install -r requirements.txt
-   ```
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
 
 ## Penggunaan
 
-1. Jalankan `downloader.py` untuk memulai proses pengunduhan.
-2. Ikuti petunjuk pada layar untuk memasukkan URL video yang ingin diunduh.
+```bash
+python downloader.py "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+```
 
-## Troubleshooting
+Opsi tambahan:
 
-Jika Anda mengalami masalah saat menjalankan downloader, silakan periksa `docs/troubleshooting.md` untuk solusi yang mungkin.
+```bash
+# Simpan ke folder tertentu
+python downloader.py "URL" --output-dir hasil
 
-## Catatan
+# Pilih format
+python downloader.py "URL" --format "bestvideo+bestaudio"
 
-Kami sangat menghargai umpan balik dan kontribusi dari pengguna lain. Jangan ragu untuk membuka isu jika Anda menemui bug atau memiliki saran untuk peningkatan.
+# Ekstrak audio mp3
+python downloader.py "URL" --audio
+
+# Hindari playlist
+python downloader.py "URL" --no-playlist
+```
+
+## Kirim ke Telegram (MTProto)
+
+Siapkan kredensial Telegram (API ID & API Hash) dari https://my.telegram.org.
+Buat sesi MTProto (StringSession) dengan Telethon, contoh singkat:
+
+```bash
+python - <<'PY'
+from telethon.sync import TelegramClient
+from telethon.sessions import StringSession
+
+api_id = int(input("API ID: "))
+api_hash = input("API Hash: ")
+
+with TelegramClient(StringSession(), api_id, api_hash) as client:
+    print(client.session.save())
+PY
+```
+
+Set environment variable berikut di VPS:
+
+```bash
+export TG_API_ID="123456"
+export TG_API_HASH="your_api_hash"
+export TG_SESSION="your_string_session"
+```
+
+Lalu jalankan:
+
+```bash
+python downloader.py "URL" --telegram
+```
+
+Opsional override chat tujuan (default Saved Messages):
+
+```bash
+python downloader.py "URL" --telegram --telegram-chat "@nama_channel"
+```
